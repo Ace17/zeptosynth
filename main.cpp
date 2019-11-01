@@ -16,6 +16,7 @@ const int PORT_NUMBER = 1;
 
 struct Voice
 {
+  double pitch = 0;
   double freq = 0;
   double vol = 0;
   double phase = 0;
@@ -24,6 +25,7 @@ struct Voice
 Voice voices[8];
 uint8_t status;
 uint8_t noteToVoice[128];
+double pitchBendDelta = 0;
 
 static double synth(double phase)
 {
@@ -31,6 +33,12 @@ static double synth(double phase)
     return sin(phase * 2.0 * M_PI);
 
   return phase - floor(phase);
+}
+
+double pitchToFreq(double pitch)
+{
+  static double const LN_2 = log(2.0);
+  return exp(pitch * LN_2 / 12.0);
 }
 
 void audioCallback(float* samples, int count, void* userParam)
@@ -43,21 +51,20 @@ void audioCallback(float* samples, int count, void* userParam)
     if(voice.vol == 0)
       continue;
 
+    auto freq = pitchToFreq(voice.pitch + pitchBendDelta - 69) * 440.0 / SAMPLERATE;
+
     for(int i = 0; i < count; ++i)
     {
       samples[i] += synth(voice.phase) * voice.vol;
-      voice.phase += voice.freq;
+      voice.phase += freq;
     }
 
     if(voice.phase >= 1)
       voice.phase -= 1;
   }
-}
 
-double pitchToFreq(int pitch)
-{
-  static double const LN_2 = log(2.0);
-  return exp((pitch - 69) * LN_2 / 12.0) * 440;
+  for(int i = 0; i < count; ++i)
+    samples[i] = atan(samples[i]) / 1.5;
 }
 
 void processMidiEvent(const uint8_t* data, int len)
@@ -69,7 +76,7 @@ void processMidiEvent(const uint8_t* data, int len)
     --len;
   }
 
-  if(status == 0xE0)
+  if(status == 0xFE)
     return; // active sensing: ignore
 
   if(status == 0x90 && data[1] > 0)
@@ -84,8 +91,8 @@ void processMidiEvent(const uint8_t* data, int len)
     noteToVoice[note] = i;
     auto& voice = voices[i];
 
-    voice.freq = pitchToFreq(data[0]) / SAMPLERATE;
-    voice.vol = 0.5;
+    voice.pitch = data[0];
+    voice.vol = 1.0;
     fprintf(stderr, "NOTE-ON: %d\n", data[0]);
   }
   else if(status == 0x80 || (status == 0x90 && data[1] == 0))
@@ -95,8 +102,13 @@ void processMidiEvent(const uint8_t* data, int len)
     voice.vol = 0;
     fprintf(stderr, "NOTE-OFF: %d\n", note);
   }
-
-  if(1)
+  else if(status == 0xE0)
+  {
+    double pos = (data[1] - 64) / 64.0;
+    pitchBendDelta = 2.0 * pos; // [-2, 2]
+    fprintf(stderr, "PITCH-BEND: %d (pos=%+.1f, factor=%.2f)\n", data[1], pos, pitchBendDelta);
+  }
+  else if(1)
   {
     fprintf(stderr, "[%.2X] ", status);
 
