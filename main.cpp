@@ -78,7 +78,7 @@ void audioCallback(float* samples, int count, void* userParam)
   }
 
   for(int i = 0; i < count; ++i)
-    samples[i] = atan(samples[i]) / 1.5;
+    samples[i] = atan(samples[i]) * 0.66;
 }
 
 void processMidiEvent(const uint8_t* data, int len)
