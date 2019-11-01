@@ -1,5 +1,7 @@
 #pragma once
 
+#include "unique.h"
+
 struct Exception
 {
   const char* msg;
@@ -11,5 +13,5 @@ struct IMidiInput
   virtual void read() = 0;
 };
 
-IMidiInput* createMidiInput(int port);
+Unique<IMidiInput> createMidiInput(int port);
 

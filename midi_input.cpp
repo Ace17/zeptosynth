@@ -141,8 +141,8 @@ struct AlsaMidiInput : IMidiInput
 };
 }
 
-IMidiInput* createMidiInput(int portNumber)
+Unique<IMidiInput> createMidiInput(int portNumber)
 {
-  return new AlsaMidiInput(portNumber);
+  return makeUnique<AlsaMidiInput>(portNumber);
 }
 

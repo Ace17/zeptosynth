@@ -19,8 +19,6 @@ void safeMain()
     SDL_Delay(1);
   }
 
-  delete input;
-
   printf("OK\n");
 }
 }
