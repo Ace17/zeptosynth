@@ -3,6 +3,7 @@
 #include <cassert>
 #include "SDL.h" // SDL_Delay
 
+#include "profiler.h"
 #include "midi_input.h"
 #include "audio_output.h"
 
@@ -45,6 +46,8 @@ double pitchToFreq(double pitch)
 
 void audioCallback(float* samples, int count, void* userParam)
 {
+  ProfileScope scope;
+
   for(int i = 0; i < count; ++i)
     samples[i] = 0;
 
