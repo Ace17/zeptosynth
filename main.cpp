@@ -3,96 +3,25 @@
 #include <cassert>
 #include "SDL.h" // SDL_Delay
 
+#include "synth.h"
 #include "profiler.h"
 #include "midi_input.h"
 #include "audio_output.h"
-
-#if defined(__arm__)
-__asm__ (".symver exp,exp@GLIBC_2.4");
-#endif
 
 namespace
 {
 const int PORT_NUMBER = 1;
 
-struct Voice
-{
-  double pitch = 0;
-  double freq = 0;
-  double vol = 0;
-  double phase = 0;
-};
-
-Voice voices[8];
-uint8_t status;
-uint8_t noteToVoice[128];
-double pitchBendDelta = 0;
-double lfoPhase = 0;
-double lfoAmount = 0;
-
-static double synth(double phase)
-{
-  if(0)
-    return sin(phase * 2.0 * M_PI);
-
-  return phase - floor(phase);
-}
-
-double pitchToFreq(double pitch)
-{
-  static double const LN_2 = log(2.0);
-  return exp(pitch * LN_2 / 12.0);
-}
-
-double clamp(double val, double min, double max)
-{
-  if(val < min)
-    return min;
-
-  if(val > max)
-    return max;
-
-  return val;
-}
-
-void audioCallback(float* samples, int count, void* userParam)
+void synthesize(float* samples, int count, void* userParam)
 {
   ProfileScope scope;
-
-  for(int i = 0; i < count; ++i)
-    samples[i] = 0;
-
-  for(auto& voice : voices)
-  {
-    if(voice.vol == 0)
-      continue;
-
-    auto pitch = voice.pitch + pitchBendDelta;
-
-    pitch += sin(lfoPhase * 2.0 * M_PI) * lfoAmount;
-
-    auto freq = pitchToFreq(pitch - 69) * 440.0 / SAMPLERATE;
-
-    for(int i = 0; i < count; ++i)
-    {
-      samples[i] += synth(voice.phase) * voice.vol;
-      voice.phase += freq;
-    }
-
-    lfoPhase += 10.0 * count / SAMPLERATE;
-
-    if(voice.phase >= 1)
-      voice.phase -= 1;
-
-    if(lfoPhase >= 1)
-      lfoPhase -= 1;
-  }
-
-  for(int i = 0; i < count; ++i)
-    samples[i] = clamp(samples[i], -1.0, 1.0);
+  auto synth = (Synth*)userParam;
+  synth->run(samples, count);
 }
 
-void processMidiEvent(const uint8_t* data, int len)
+uint8_t status;
+
+void processMidiEvent(Synth* synth, const uint8_t* data, int len)
 {
   if(data[0] & 0x80)
   {
@@ -110,11 +39,11 @@ void processMidiEvent(const uint8_t* data, int len)
 
     int i = 0;
 
-    while(voices[i].vol > 0 && i < 16 - 1)
+    while(synth->voices[i].vol > 0 && i < 16 - 1)
       ++i;
 
-    noteToVoice[note] = i;
-    auto& voice = voices[i];
+    synth->noteToVoice[note] = i;
+    auto& voice = synth->voices[i];
 
     voice.pitch = data[0];
     voice.vol = 1.0;
@@ -123,7 +52,7 @@ void processMidiEvent(const uint8_t* data, int len)
   else if(status == 0x80 || (status == 0x90 && data[1] == 0))
   {
     int note = data[0];
-    auto& voice = voices[noteToVoice[note]];
+    auto& voice = synth->voices[synth->noteToVoice[note]];
     voice.vol = 0;
     fprintf(stderr, "NOTE-OFF: %d\n", note);
   }
@@ -131,7 +60,7 @@ void processMidiEvent(const uint8_t* data, int len)
   {
     if(data[0] == 1) // mod wheel
     {
-      lfoAmount = data[1] / 128.0;
+      synth->lfoAmount = data[1] / 128.0;
     }
     else
     {
@@ -141,8 +70,7 @@ void processMidiEvent(const uint8_t* data, int len)
   else if(status == 0xE0)
   {
     double pos = (data[1] - 64) / 64.0;
-    pitchBendDelta = 2.0 * pos; // [-2, 2]
-    fprintf(stderr, "PITCH-BEND: %d (pos=%+.1f, factor=%.2f)\n", data[1], pos, pitchBendDelta);
+    synth->pitchBendDelta = 2.0 * pos; // [-2, 2]
   }
   else if(1)
   {
@@ -158,8 +86,10 @@ void processMidiEvent(const uint8_t* data, int len)
 
 void safeMain()
 {
+  Synth synth;
+
   auto input = createMidiInput(PORT_NUMBER);
-  auto output = createAudioOutput(&audioCallback, nullptr);
+  auto output = createAudioOutput(&synthesize, &synth);
 
   while(1)
   {
@@ -167,7 +97,7 @@ void safeMain()
     int len;
 
     while((len = input->read(buffer)) > 0)
-      processMidiEvent(buffer, len);
+      processMidiEvent(&synth, buffer, len);
 
     SDL_Delay(1);
   }

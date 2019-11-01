@@ -7,6 +7,7 @@ PKGS+=(alsa)
 
 SRCS=()
 SRCS+=(main.cpp)
+SRCS+=(synth.cpp)
 SRCS+=(midi_input.cpp)
 SRCS+=(audio_output_sdl.cpp)
 
@@ -28,6 +29,7 @@ echo "------------"
 echo "RPI build"
 export PKG_CONFIG_LIBDIR=/usr/lib/arm-linux-gnueabihf/pkgconfig:/opt/envs/rpi/lib/pkgconfig
 timeexec arm-linux-gnueabihf-g++ -O3 ${SRCS[@]} $(pkg-config ${PKGS[@]} --cflags --libs) -o zeptosynth
+arm-linux-gnueabihf-strip -s zeptosynth
 stat -c '%s' zeptosynth
 echo ""
 )
