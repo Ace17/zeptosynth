@@ -42,7 +42,18 @@ void safeMain()
 
   while(1)
   {
-    input->read();
+    uint8_t buffer[IMidiInput::MAX_SIZE];
+    int len;
+
+    while((len = input->read(buffer)) > 0)
+    {
+      for(int i = 0; i < len; ++i)
+        fprintf(stderr, "%.2X ", buffer[i]);
+
+      fprintf(stderr, "\n");
+      fflush(stderr);
+    }
+
     SDL_Delay(1);
   }
 

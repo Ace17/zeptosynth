@@ -61,8 +61,6 @@ bool isMidiEvent(snd_seq_event_type t)
   }
 }
 
-constexpr int MAX_SIZE = 4096;
-
 struct AlsaMidiInput : IMidiInput
 {
   AlsaMidiInput(int portNumber)
@@ -109,31 +107,29 @@ struct AlsaMidiInput : IMidiInput
     snd_midi_event_free(m_event);
   }
 
-  void read() override
+  int read(uint8_t* buffer) override
   {
     if(snd_seq_event_input_pending(m_seq, 1) == 0)
-      return;
+      return 0;
 
     snd_seq_event_t* e = nullptr;
     auto i = snd_seq_event_input(m_seq, &e);
 
     if(!e || i < 0 || e->type == SND_SEQ_EVENT_USR0)
-      return; // stop thread?
+      return -1; // stop thread?
 
     if(!isMidiEvent((snd_seq_event_type)e->type))
-      return;
+      return 0;
 
-    uint8_t buff[MAX_SIZE];
-    auto len = snd_midi_event_decode(m_event, buff, sizeof buff, e);
+    auto len = snd_midi_event_decode(m_event, buffer, MAX_SIZE, e);
 
     if(len < 0)
     {
       fprintf(stderr, "midi event decode error : %d\n", len);
-      return;
+      return -2;
     }
 
-    fprintf(stderr, "got midi event!\n");
-    fflush(stderr);
+    return len;
   }
 
   snd_seq_t* m_seq;

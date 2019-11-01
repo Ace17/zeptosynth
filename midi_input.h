@@ -1,11 +1,14 @@
 #pragma once
 
 #include "unique.h"
+#include <cstdint>
 
 struct IMidiInput
 {
+  static constexpr int MAX_SIZE = 4096;
+
   virtual ~IMidiInput() = default;
-  virtual void read() = 0;
+  virtual int read(uint8_t* buffer) = 0;
 };
 
 Unique<IMidiInput> createMidiInput(int port);
