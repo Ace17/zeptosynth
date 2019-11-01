@@ -113,26 +113,24 @@ struct AlsaMidiInput : IMidiInput
       return;
 
     snd_seq_event_t* e = nullptr;
-    printf("readEvents: waiting for one event");
     auto i = snd_seq_event_input(m_seq, &e);
 
     if(!e || i < 0 || e->type == SND_SEQ_EVENT_USR0)
       return; // stop thread?
 
-    printf("readEvents: got event (%d)\n", i);
+    if(!isMidiEvent((snd_seq_event_type)e->type))
+      return;
 
-    if(isMidiEvent((snd_seq_event_type)e->type))
+    auto len = snd_midi_event_decode(m_event, m_buffer, sizeof m_buffer, e);
+
+    if(len < 0)
     {
-      auto len = snd_midi_event_decode(m_event, m_buffer, sizeof m_buffer, e);
-
-      if(len < 0)
-      {
-        printf("midi event decode error : %d\n", len);
-      }
-
-      printf("got midi event!\n");
-      fflush(stdout);
+      fprintf(stderr, "midi event decode error : %d\n", len);
+      return;
     }
+
+    fprintf(stderr, "got midi event!\n");
+    fflush(stderr);
   }
 
   snd_seq_t* m_seq;
