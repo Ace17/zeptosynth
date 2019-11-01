@@ -1,5 +1,10 @@
 #pragma once
 
+struct Exception
+{
+  const char* msg;
+};
+
 // lightweight unique_ptr replacement
 template<typename T>
 struct Unique

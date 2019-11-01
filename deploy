@@ -10,6 +10,7 @@ PKGS+=(alsa)
 SRCS=()
 SRCS+=(main.cpp)
 SRCS+=(midi_input.cpp)
+SRCS+=(audio_output_sdl.cpp)
 
 function timeexec
 {

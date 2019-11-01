@@ -2,11 +2,6 @@
 
 #include "unique.h"
 
-struct Exception
-{
-  const char* msg;
-};
-
 struct IMidiInput
 {
   virtual ~IMidiInput() = default;
