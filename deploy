@@ -7,15 +7,19 @@ PKGS=()
 PKGS+=(sdl2)
 PKGS+=(alsa)
 
+SRCS=()
+SRCS+=(main.cpp)
+SRCS+=(midi_input.cpp)
+
 echo "Native build"
 (
-g++ main.cpp $(pkg-config ${PKGS[@]} --cflags --libs) -o zeptosynth-native
+g++ ${SRCS[@]} $(pkg-config ${PKGS[@]} --cflags --libs) -o zeptosynth-native
 )
 
 echo "RPI build"
 (
 export PKG_CONFIG_LIBDIR=/usr/lib/arm-linux-gnueabihf/pkgconfig:/opt/envs/rpi/lib/pkgconfig
-arm-linux-gnueabihf-g++ main.cpp $(pkg-config ${PKGS[@]} --cflags --libs) -o zeptosynth
+arm-linux-gnueabihf-g++ ${SRCS[@]} $(pkg-config ${PKGS[@]} --cflags --libs) -o zeptosynth
 )
 
 stat -c '%s' zeptosynth
