@@ -27,8 +27,14 @@ echo ""
 (
 echo "------------"
 echo "RPI build"
+
+OPT+=(-O3)
+# OPT+=(-mcpu=cortex-a53)
+# OPT+=(-mtune=cortex-a53)
+# OPT+=(-mfloat-abi=hard)
+# OPT+=(-mfpu=neon-fp-armv8)
 export PKG_CONFIG_LIBDIR=/usr/lib/arm-linux-gnueabihf/pkgconfig:/opt/envs/rpi/lib/pkgconfig
-timeexec arm-linux-gnueabihf-g++ -O3 ${SRCS[@]} $(pkg-config ${PKGS[@]} --cflags --libs) -o zeptosynth
+timeexec arm-linux-gnueabihf-g++ ${OPT[@]} ${SRCS[@]} $(pkg-config ${PKGS[@]} --cflags --libs) -o zeptosynth
 arm-linux-gnueabihf-strip -s zeptosynth
 stat -c '%s' zeptosynth
 echo ""
