@@ -26,6 +26,8 @@ Voice voices[8];
 uint8_t status;
 uint8_t noteToVoice[128];
 double pitchBendDelta = 0;
+double lfoPhase = 0;
+double lfoAmount = 0;
 
 static double synth(double phase)
 {
@@ -51,7 +53,11 @@ void audioCallback(float* samples, int count, void* userParam)
     if(voice.vol == 0)
       continue;
 
-    auto freq = pitchToFreq(voice.pitch + pitchBendDelta - 69) * 440.0 / SAMPLERATE;
+    auto pitch = voice.pitch + pitchBendDelta;
+
+    pitch += sin(lfoPhase * 2.0 * M_PI) * lfoAmount;
+
+    auto freq = pitchToFreq(pitch - 69) * 440.0 / SAMPLERATE;
 
     for(int i = 0; i < count; ++i)
     {
@@ -59,8 +65,13 @@ void audioCallback(float* samples, int count, void* userParam)
       voice.phase += freq;
     }
 
+    lfoPhase += 10.0 * count / SAMPLERATE;
+
     if(voice.phase >= 1)
       voice.phase -= 1;
+
+    if(lfoPhase >= 1)
+      lfoPhase -= 1;
   }
 
   for(int i = 0; i < count; ++i)
@@ -101,6 +112,17 @@ void processMidiEvent(const uint8_t* data, int len)
     auto& voice = voices[noteToVoice[note]];
     voice.vol = 0;
     fprintf(stderr, "NOTE-OFF: %d\n", note);
+  }
+  else if(status == 0xB0)
+  {
+    if(data[0] == 1) // mod wheel
+    {
+      lfoAmount = data[1] / 128.0;
+    }
+    else
+    {
+      fprintf(stderr, "Unknown CC: %d %d\n", data[0], data[1]);
+    }
   }
   else if(status == 0xE0)
   {
