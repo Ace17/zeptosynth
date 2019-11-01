@@ -61,6 +61,8 @@ bool isMidiEvent(snd_seq_event_type t)
   }
 }
 
+constexpr int MAX_SIZE = 4096;
+
 struct AlsaMidiInput : IMidiInput
 {
   AlsaMidiInput(int portNumber)
@@ -68,7 +70,7 @@ struct AlsaMidiInput : IMidiInput
     if(snd_seq_open(&m_seq, "default", SND_SEQ_OPEN_INPUT | SND_SEQ_OPEN_OUTPUT, 0) != 0)
       throw  Exception { "Can't open ALSA sequencer" };
 
-    auto ret = snd_midi_event_new(sizeof m_buffer, &m_event);
+    auto ret = snd_midi_event_new(MAX_SIZE, &m_event);
 
     if(ret < 0)
       throw  Exception { "Can't create ALSA parser" };
@@ -121,7 +123,8 @@ struct AlsaMidiInput : IMidiInput
     if(!isMidiEvent((snd_seq_event_type)e->type))
       return;
 
-    auto len = snd_midi_event_decode(m_event, m_buffer, sizeof m_buffer, e);
+    uint8_t buff[MAX_SIZE];
+    auto len = snd_midi_event_decode(m_event, buff, sizeof buff, e);
 
     if(len < 0)
     {
@@ -135,7 +138,6 @@ struct AlsaMidiInput : IMidiInput
 
   snd_seq_t* m_seq;
   snd_midi_event_t* m_event;
-  uint8_t m_buffer[4096];
 };
 }
 
