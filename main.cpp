@@ -35,25 +35,15 @@ void processMidiEvent(Synth* synth, const uint8_t* data, int len)
 
   if(status == 0x90 && data[1] > 0)
   {
-    int note = data[0];
+    const int note = data[0];
 
-    int i = 0;
-
-    while(synth->voices[i].vol > 0 && i < 16 - 1)
-      ++i;
-
-    synth->noteToVoice[note] = i;
-    auto& voice = synth->voices[i];
-
-    voice.pitch = data[0];
-    voice.vol = 1.0;
-    fprintf(stderr, "NOTE-ON: %d\n", data[0]);
+    synth->noteOn(note);
+    fprintf(stderr, "NOTE-ON: %d\n", note);
   }
   else if(status == 0x80 || (status == 0x90 && data[1] == 0))
   {
     int note = data[0];
-    auto& voice = synth->voices[synth->noteToVoice[note]];
-    voice.vol = 0;
+    synth->noteOff(note);
     fprintf(stderr, "NOTE-OFF: %d\n", note);
   }
   else if(status == 0xB0)

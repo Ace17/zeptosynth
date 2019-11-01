@@ -68,3 +68,24 @@ void Synth::run(float* samples, int count)
     samples[i] = clamp(samples[i], -1.0, 1.0);
 }
 
+void Synth::noteOn(int note)
+{
+  int i = 0;
+
+  // find free voice, steal the last one in the worst case
+  while(voices[i].vol > 0 && i < 16 - 1)
+    ++i;
+
+  noteToVoice[note] = i;
+  auto& voice = voices[i];
+  voice.pitch = note;
+  voice.vol = 1.0;
+}
+
+void Synth::noteOff(int note)
+{
+  int i = noteToVoice[note];
+  auto& voice = voices[i];
+  voice.vol = 0;
+}
+

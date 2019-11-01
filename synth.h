@@ -16,6 +16,9 @@ struct Synth
   double lfoPhase = 0;
   double lfoAmount = 0;
 
+  void noteOn(int note);
+  void noteOff(int note);
+
   void run(float* samples, int count);
 };
 
