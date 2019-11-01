@@ -20,8 +20,9 @@ double phase = 0;
 
 static double synth(double phase)
 {
-  return sin(phase * 2.0 * M_PI);
-  // return phase - floor(phase);
+  if(0)
+    return sin(phase * 2.0 * M_PI);
+  return phase - floor(phase);
 }
 
 void audioCallback(float* samples, int count, void* userParam)
@@ -39,28 +40,41 @@ void audioCallback(float* samples, int count, void* userParam)
 double pitchToFreq(int pitch)
 {
   static double const LN_2 = log(2.0);
-  return exp(pitch * LN_2 / 12.0) * 440;
+  return exp((pitch-69) * LN_2 / 12.0) * 440;
 }
 
-void processEvent(const uint8_t* data, int len)
+void processMidiEvent(const uint8_t* data, int len)
 {
-  if(data[0] == 0x90)
+  static uint8_t status;
+  if(data[0] & 0x80)
   {
-    freq = pitchToFreq(data[1] - 69);
-    fprintf(stderr, "%.2f\n", freq);
-    fflush(stderr);
+    status = data[0];
+    ++data;
+    --len;
+  }
+
+  if(status == 0x90 && data[1] > 0)
+  {
+    freq = pitchToFreq(data[0]);
+    fprintf(stderr, "NOTE-ON: %d (%.2f)\n", data[0], freq);
     vol = 0.5;
   }
-  else if(data[0] == 0x80)
+  else if(status == 0x80 || (status == 0x90 && data[1] == 0))
   {
+    fprintf(stderr, "NOTE-OFF: %d\n", data[0]);
     vol = 0;
   }
 
-  for(int i = 0; i < len; ++i)
-    fprintf(stderr, "%.2X ", data[i]);
+  if(1)
+  {
+    fprintf(stderr, "[%.2X] ", status);
 
-  fprintf(stderr, "\n");
-  fflush(stderr);
+    for(int i = 0; i < len; ++i)
+      fprintf(stderr, "%.2X ", data[i]);
+
+    fprintf(stderr, "\n");
+    fflush(stderr);
+  }
 }
 
 void safeMain()
@@ -74,14 +88,10 @@ void safeMain()
     int len;
 
     while((len = input->read(buffer)) > 0)
-    {
-      processEvent(buffer, len);
-    }
+      processMidiEvent(buffer, len);
 
     SDL_Delay(1);
   }
-
-  printf("OK\n");
 }
 }
 
