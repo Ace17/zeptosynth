@@ -14,38 +14,54 @@ namespace
 {
 const int PORT_NUMBER = 1;
 
-double freq = 0;
-double vol = 0;
-double phase = 0;
+struct Voice
+{
+  double freq = 0;
+  double vol = 0;
+  double phase = 0;
+};
+
+Voice voices[8];
+uint8_t status;
+uint8_t noteToVoice[128];
 
 static double synth(double phase)
 {
   if(0)
     return sin(phase * 2.0 * M_PI);
+
   return phase - floor(phase);
 }
 
 void audioCallback(float* samples, int count, void* userParam)
 {
   for(int i = 0; i < count; ++i)
-  {
-    samples[i] = synth(phase) * vol;
-    phase += freq / SAMPLERATE;
-  }
+    samples[i] = 0;
 
-  if(phase >= 1)
-    phase -= 1;
+  for(auto& voice : voices)
+  {
+    if(voice.vol == 0)
+      continue;
+
+    for(int i = 0; i < count; ++i)
+    {
+      samples[i] += synth(voice.phase) * voice.vol;
+      voice.phase += voice.freq;
+    }
+
+    if(voice.phase >= 1)
+      voice.phase -= 1;
+  }
 }
 
 double pitchToFreq(int pitch)
 {
   static double const LN_2 = log(2.0);
-  return exp((pitch-69) * LN_2 / 12.0) * 440;
+  return exp((pitch - 69) * LN_2 / 12.0) * 440;
 }
 
 void processMidiEvent(const uint8_t* data, int len)
 {
-  static uint8_t status;
   if(data[0] & 0x80)
   {
     status = data[0];
@@ -53,16 +69,31 @@ void processMidiEvent(const uint8_t* data, int len)
     --len;
   }
 
+  if(status == 0xE0)
+    return; // active sensing: ignore
+
   if(status == 0x90 && data[1] > 0)
   {
-    freq = pitchToFreq(data[0]);
-    fprintf(stderr, "NOTE-ON: %d (%.2f)\n", data[0], freq);
-    vol = 0.5;
+    int note = data[0];
+
+    int i = 0;
+
+    while(voices[i].vol > 0 && i < 16 - 1)
+      ++i;
+
+    noteToVoice[note] = i;
+    auto& voice = voices[i];
+
+    voice.freq = pitchToFreq(data[0]) / SAMPLERATE;
+    voice.vol = 0.5;
+    fprintf(stderr, "NOTE-ON: %d\n", data[0]);
   }
   else if(status == 0x80 || (status == 0x90 && data[1] == 0))
   {
-    fprintf(stderr, "NOTE-OFF: %d\n", data[0]);
-    vol = 0;
+    int note = data[0];
+    auto& voice = voices[noteToVoice[note]];
+    voice.vol = 0;
+    fprintf(stderr, "NOTE-OFF: %d\n", note);
   }
 
   if(1)
