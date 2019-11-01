@@ -44,6 +44,17 @@ double pitchToFreq(double pitch)
   return exp(pitch * LN_2 / 12.0);
 }
 
+double clamp(double val, double min, double max)
+{
+  if(val < min)
+    return min;
+
+  if(val > max)
+    return max;
+
+  return val;
+}
+
 void audioCallback(float* samples, int count, void* userParam)
 {
   ProfileScope scope;
@@ -78,7 +89,7 @@ void audioCallback(float* samples, int count, void* userParam)
   }
 
   for(int i = 0; i < count; ++i)
-    samples[i] = atan(samples[i]) * 0.66;
+    samples[i] = clamp(samples[i], -1.0, 1.0);
 }
 
 void processMidiEvent(const uint8_t* data, int len)
