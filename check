@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PKGS=()
+PKGS+=(sdl2)
+PKGS+=(alsa)
+
+SRCS=()
+SRCS+=(main.cpp)
+SRCS+=(midi_input.cpp)
+SRCS+=(audio_output_sdl.cpp)
+
+function timeexec
+{
+  /usr/bin/time -f "%U" "$@"
+}
+
+(
+echo "------------"
+echo "Native build"
+timeexec g++                     ${SRCS[@]} $(pkg-config ${PKGS[@]} --cflags --libs) -o zeptosynth-native
+stat -c '%s' zeptosynth-native
+echo ""
+)
+
+(
+echo "------------"
+echo "RPI build"
+export PKG_CONFIG_LIBDIR=/usr/lib/arm-linux-gnueabihf/pkgconfig:/opt/envs/rpi/lib/pkgconfig
+timeexec arm-linux-gnueabihf-g++ ${SRCS[@]} $(pkg-config ${PKGS[@]} --cflags --libs) -o zeptosynth
+stat -c '%s' zeptosynth
+echo ""
+)
+
