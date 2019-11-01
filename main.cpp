@@ -6,13 +6,17 @@
 #include "midi_input.h"
 #include "audio_output.h"
 
+#if defined(__arm__)
+__asm__ (".symver exp,exp@GLIBC_2.4");
+#endif
+
 namespace
 {
 const int PORT_NUMBER = 1;
 
-double freq = 880;
+double freq = 0;
+double vol = 0;
 double phase = 0;
-double lfoPhase = 0;
 
 static double synth(double phase)
 {
@@ -24,15 +28,39 @@ void audioCallback(float* samples, int count, void* userParam)
 {
   for(int i = 0; i < count; ++i)
   {
-    samples[i] = synth(phase) * 0.5;
+    samples[i] = synth(phase) * vol;
     phase += freq / SAMPLERATE;
   }
 
   if(phase >= 1)
     phase -= 1;
+}
 
-  if(lfoPhase >= 1)
-    lfoPhase -= 1;
+double pitchToFreq(int pitch)
+{
+  static double const LN_2 = log(2.0);
+  return exp(pitch * LN_2 / 12.0) * 440;
+}
+
+void processEvent(const uint8_t* data, int len)
+{
+  if(data[0] == 0x90)
+  {
+    freq = pitchToFreq(data[1] - 69);
+    fprintf(stderr, "%.2f\n", freq);
+    fflush(stderr);
+    vol = 0.5;
+  }
+  else if(data[0] == 0x80)
+  {
+    vol = 0;
+  }
+
+  for(int i = 0; i < len; ++i)
+    fprintf(stderr, "%.2X ", data[i]);
+
+  fprintf(stderr, "\n");
+  fflush(stderr);
 }
 
 void safeMain()
@@ -47,11 +75,7 @@ void safeMain()
 
     while((len = input->read(buffer)) > 0)
     {
-      for(int i = 0; i < len; ++i)
-        fprintf(stderr, "%.2X ", buffer[i]);
-
-      fprintf(stderr, "\n");
-      fflush(stderr);
+      processEvent(buffer, len);
     }
 
     SDL_Delay(1);
