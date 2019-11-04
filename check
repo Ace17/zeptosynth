@@ -17,6 +17,10 @@ function timeexec
 }
 
 (
+timeexec g++ main_profile.cpp synth.cpp -o profile
+)
+
+(
 echo "------------"
 echo "Native build"
 timeexec g++                     ${SRCS[@]} $(pkg-config ${PKGS[@]} --cflags --libs) -o zeptosynth-native
