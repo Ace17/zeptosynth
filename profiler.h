@@ -26,8 +26,9 @@ struct ProfileScope
     {
       fprintf(stderr, "% 4.0f |", durationMs);
 
-      for(int i=0; i < int(durationMs);++i)
+      for(int i = 0; i < int(durationMs); ++i)
         fprintf(stderr, "*");
+
       fprintf(stderr, "\n");
     }
   }
