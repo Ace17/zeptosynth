@@ -65,7 +65,10 @@ void Synth::run(float* samples, int count)
   }
 
   for(int i = 0; i < count; ++i)
+  {
+    samples[i] = atan(samples[i])/(M_PI * 0.5);
     samples[i] = clamp(samples[i], -1.0, 1.0);
+  }
 }
 
 void Synth::noteOn(int note)
