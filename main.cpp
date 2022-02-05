@@ -84,9 +84,10 @@ void safeMain()
   while(1)
   {
     uint8_t buffer[IMidiInput::MAX_SIZE];
+    double timestamp;
     int len;
 
-    while((len = input->read(buffer)) > 0)
+    while((len = input->read(buffer, timestamp)) > 0)
       processMidiEvent(&synth, buffer, len);
 
     SDL_Delay(1);

@@ -3,6 +3,7 @@
 
 #include "alsa/asoundlib.h"
 #include "alsa/seq.h"
+#include "monotime.h"
 
 namespace
 {
@@ -107,10 +108,12 @@ struct AlsaMidiInput : IMidiInput
     snd_midi_event_free(m_event);
   }
 
-  int read(uint8_t* buffer) override
+  int read(uint8_t* buffer, double& timestamp) override
   {
     if(snd_seq_event_input_pending(m_seq, 1) == 0)
       return 0;
+
+    timestamp = get_monotonic_time();
 
     snd_seq_event_t* e = nullptr;
     auto i = snd_seq_event_input(m_seq, &e);
