@@ -99,6 +99,10 @@ void Synth::noteOn(int note)
 {
   int i = 0;
 
+  // ignore invalid notes
+  if(note < 0 || note >= 128)
+    return;
+
   // find free voice, steal the last one in the worst case
   while(voices[i].vol > 0 && i < MaxVoices - 1)
     ++i;
