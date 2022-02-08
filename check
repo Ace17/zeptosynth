@@ -17,7 +17,8 @@ function timeexec
 }
 
 (
-timeexec g++ -O3 main_profile.cpp synth.cpp -o profile
+timeexec g++ -o profile -O3 main_profile.cpp synth.cpp
+timeexec g++ -o demo    -O3 main_demo.cpp    synth.cpp audio_output_sdl.cpp $(pkg-config ${PKGS[@]} --cflags --libs)
 )
 
 (
