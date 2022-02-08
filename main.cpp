@@ -19,10 +19,10 @@ void synthesize(float* samples, int count, void* userParam)
   synth->run(samples, count);
 }
 
-uint8_t status;
-
 void processMidiEvent(Synth* synth, const uint8_t* data, int len)
 {
+  static uint8_t status;
+
   if(data[0] & 0x80)
   {
     status = data[0];
@@ -37,20 +37,23 @@ void processMidiEvent(Synth* synth, const uint8_t* data, int len)
   {
     const int note = data[0];
 
-    synth->noteOn(note);
+    synth->pushCommand({Command::NoteOn, note, 1});
     fprintf(stderr, "NOTE-ON: %d\n", note);
   }
   else if(status == 0x80 || (status == 0x90 && data[1] == 0))
   {
     int note = data[0];
-    synth->noteOff(note);
+    synth->pushCommand({Command::NoteOff, note, 1});
     fprintf(stderr, "NOTE-OFF: %d\n", note);
   }
   else if(status == 0xB0)
   {
     if(data[0] == 1) // mod wheel
     {
-      synth->lfoAmount = data[1] / 128.0;
+      const double value = data[1] / 128.0;
+
+      // LFO amount
+      synth->pushCommand({Command::ConfigChange, 1, value});
     }
     else
     {
@@ -60,7 +63,10 @@ void processMidiEvent(Synth* synth, const uint8_t* data, int len)
   else if(status == 0xE0)
   {
     double pos = (data[1] - 64) / 64.0;
-    synth->pitchBendDelta = 2.0 * pos; // [-2, 2]
+    const double value = 2.0 * pos; // [-2, 2]
+
+    // pitchbend delta
+    synth->pushCommand({Command::ConfigChange, 2, value});
   }
   else if(1)
   {

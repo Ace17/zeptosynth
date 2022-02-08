@@ -35,6 +35,8 @@ inline double osc(double phase)
 
 void Synth::run(float* samples, int count)
 {
+  processPendingCommands();
+
   for(int i = 0; i < count; ++i)
     samples[i] = 0;
 
@@ -43,9 +45,9 @@ void Synth::run(float* samples, int count)
     if(voice.vol == 0)
       continue;
 
-    auto pitch = voice.pitch + pitchBendDelta;
+    auto pitch = voice.pitch + config.PitchBendDelta;
 
-    pitch += sin(lfoPhase * 2.0 * M_PI) * lfoAmount;
+    pitch += sin(lfoPhase * 2.0 * M_PI) * config.LfoAmount;
 
     auto freq = pitchToFreq(pitch - 69) * 440.0 / SAMPLERATE;
 
@@ -71,12 +73,38 @@ void Synth::run(float* samples, int count)
   }
 }
 
+void Synth::pushCommand(const Command& cmd)
+{
+  commandQueue.push(cmd);
+}
+
+void Synth::processPendingCommands()
+{
+  Command cmd;
+  while(commandQueue.pop(cmd))
+  {
+    switch(cmd.type)
+    {
+    case Command::NoteOn:
+      noteOn(cmd.value1);
+      break;
+    case Command::NoteOff:
+      noteOff(cmd.value1);
+      break;
+    case Command::ConfigChange:
+      config.values[cmd.value1] = cmd.value2;
+      break;
+    }
+
+  }
+}
+
 void Synth::noteOn(int note)
 {
   int i = 0;
 
   // find free voice, steal the last one in the worst case
-  while(voices[i].vol > 0 && i < 16 - 1)
+  while(voices[i].vol > 0 && i < MaxVoices - 1)
     ++i;
 
   noteToVoice[note] = i;
