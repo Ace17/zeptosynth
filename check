@@ -17,7 +17,7 @@ function timeexec
 }
 
 (
-timeexec g++ main_profile.cpp synth.cpp -o profile
+timeexec g++ -O3 main_profile.cpp synth.cpp -o profile
 )
 
 (

@@ -1,26 +1,32 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "monotime.h"
 #include "synth.h"
 
 int main()
 {
   Synth synth;
 
-  int sampleCount = 1024 * 1024 * 128;
+  const int N = 1024 * 1024 * 256;
   const int blockSize = 256;
 
-  auto t1 = clock();
+  const auto t0 = get_monotonic_time();
 
+  int note = 60;
+  int sampleCount = N;
   while(sampleCount > 0)
   {
     float buff[blockSize];
+    synth.pushCommand({Command::NoteOn, note%128, 1});
     synth.run(buff, blockSize);
     sampleCount -= blockSize;
+    ++note;
   }
 
-  auto t2 = clock();
+  const auto t1 = get_monotonic_time();
 
-  printf("time=%.2f\n", (t2 - t1) / double(CLOCKS_PER_SEC));
+  fprintf(stderr, "Speed: %.3f kilosample/s\n", N/((t1-t0)*1000.0));
+
   return 0;
 }
