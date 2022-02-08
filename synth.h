@@ -40,21 +40,20 @@ static_assert(&DefaultConfig.values[2] == &DefaultConfig.PitchBendDelta);
 
 struct Synth
 {
-public:
-
+  public:
   // called from audio thread
   void run(float* samples, int count);
 
   // called from input thread
   void pushCommand(const Command& cmd);
 
-private:
+  private:
   void processPendingCommands();
   void noteOn(int note);
   void noteOff(int note);
 
   // synth config
-  Config config {};
+  Config config{};
 
   // synth state
   struct Voice
@@ -65,11 +64,10 @@ private:
     double phase = 0;
   };
 
-  Voice voices[MaxVoices] {};
-  char noteToVoice[128] {};
+  Voice voices[MaxVoices]{};
+  char noteToVoice[128]{};
   double lfoPhase = 0;
 
   // command queue: filled b the input thread, consumed by the audio thread
   Fifo<Command> commandQueue;
 };
-

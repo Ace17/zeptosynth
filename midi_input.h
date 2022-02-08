@@ -1,7 +1,8 @@
 #pragma once
 
-#include "unique.h"
 #include <cstdint>
+
+#include "unique.h"
 
 struct IMidiInput
 {
@@ -12,4 +13,3 @@ struct IMidiInput
 };
 
 Unique<IMidiInput> createMidiInput(int port);
-

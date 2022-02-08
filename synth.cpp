@@ -5,7 +5,7 @@
 #include "audio_output.h" // SAMPLERATE
 
 #if defined(__arm__)
-__asm__ (".symver exp,exp@GLIBC_2.4");
+__asm__(".symver exp,exp@GLIBC_2.4");
 #endif
 
 inline double clamp(double val, double min, double max)
@@ -68,15 +68,12 @@ void Synth::run(float* samples, int count)
 
   for(int i = 0; i < count; ++i)
   {
-    samples[i] = atan(samples[i])/(M_PI * 0.5);
+    samples[i] = atan(samples[i]) / (M_PI * 0.5);
     samples[i] = clamp(samples[i], -1.0, 1.0);
   }
 }
 
-void Synth::pushCommand(const Command& cmd)
-{
-  commandQueue.push(cmd);
-}
+void Synth::pushCommand(const Command& cmd) { commandQueue.push(cmd); }
 
 void Synth::processPendingCommands()
 {
@@ -95,7 +92,6 @@ void Synth::processPendingCommands()
       config.values[cmd.value1] = cmd.value2;
       break;
     }
-
   }
 }
 
@@ -119,4 +115,3 @@ void Synth::noteOff(int note)
   auto& voice = voices[i];
   voice.vol = 0;
 }
-

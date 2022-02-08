@@ -1,13 +1,16 @@
 #pragma once
 
-#include <stdint.h>
 #include <atomic>
+#include <stdint.h>
 #include <vector>
 
 template<typename T>
 struct Fifo
 {
-  Fifo(int maxCount = 1024) : data(maxCount) {}
+  Fifo(int maxCount = 1024)
+      : data(maxCount)
+  {
+  }
 
   void push(const T& element)
   {
@@ -34,10 +37,9 @@ struct Fifo
     return true;
   }
 
-private:
+  private:
   std::vector<T> data;
 
-  std::atomic<int> m_readPos {};
-  std::atomic<int> m_writePos {};
+  std::atomic<int> m_readPos{};
+  std::atomic<int> m_writePos{};
 };
-

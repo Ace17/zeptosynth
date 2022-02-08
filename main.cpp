@@ -1,12 +1,12 @@
-#include <stdio.h>
-#include <stdint.h>
 #include <cassert>
-#include "SDL.h" // SDL_Delay
+#include <stdint.h>
+#include <stdio.h>
 
-#include "synth.h"
-#include "profiler.h"
-#include "midi_input.h"
+#include "SDL.h" // SDL_Delay
 #include "audio_output.h"
+#include "midi_input.h"
+#include "profiler.h"
+#include "synth.h"
 
 namespace
 {
@@ -114,4 +114,3 @@ int main()
     return 1;
   }
 }
-

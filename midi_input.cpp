@@ -3,6 +3,7 @@
 
 #include "alsa/asoundlib.h"
 #include "alsa/seq.h"
+
 #include "monotime.h"
 
 namespace
@@ -67,16 +68,17 @@ struct AlsaMidiInput : IMidiInput
   AlsaMidiInput(int portNumber)
   {
     if(snd_seq_open(&m_seq, "default", SND_SEQ_OPEN_INPUT | SND_SEQ_OPEN_OUTPUT, 0) != 0)
-      throw  Exception { "Can't open ALSA sequencer" };
+      throw Exception{"Can't open ALSA sequencer"};
 
     auto ret = snd_midi_event_new(MAX_SIZE, &m_event);
 
     if(ret < 0)
-      throw  Exception { "Can't create ALSA parser" };
+      throw Exception{"Can't create ALSA parser"};
 
     snd_seq_set_client_name(m_seq, "Zeptosynth");
 
-    int alsaPort = snd_seq_create_simple_port(m_seq, "ZeptosynthInput", SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE, SND_SEQ_PORT_TYPE_SYNTH);
+    int alsaPort = snd_seq_create_simple_port(
+          m_seq, "ZeptosynthInput", SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE, SND_SEQ_PORT_TYPE_SYNTH);
 
     // Connect to portNumber
     {
@@ -84,13 +86,13 @@ struct AlsaMidiInput : IMidiInput
       snd_seq_port_info_alloca(&pinfo);
 
       if(!portInfo(m_seq, pinfo, SND_SEQ_PORT_CAP_READ | SND_SEQ_PORT_CAP_SUBS_READ, portNumber))
-        throw Exception { "Can't get port info" };
+        throw Exception{"Can't get port info"};
 
-      snd_seq_addr_t sender {};
+      snd_seq_addr_t sender{};
       sender.client = snd_seq_port_info_get_client(pinfo);
       sender.port = snd_seq_port_info_get_port(pinfo);
 
-      snd_seq_addr_t receiver {};
+      snd_seq_addr_t receiver{};
       receiver.client = snd_seq_client_id(m_seq);
 
       snd_seq_port_subscribe_t* subs;
@@ -99,14 +101,11 @@ struct AlsaMidiInput : IMidiInput
       snd_seq_port_subscribe_set_dest(subs, &receiver);
 
       if(snd_seq_subscribe_port(m_seq, subs))
-        throw  Exception { "Can't subscribe to input events" };
+        throw Exception{"Can't subscribe to input events"};
     }
   }
 
-  ~AlsaMidiInput()
-  {
-    snd_midi_event_free(m_event);
-  }
+  ~AlsaMidiInput() { snd_midi_event_free(m_event); }
 
   int read(uint8_t* buffer, double& timestamp) override
   {
@@ -140,8 +139,4 @@ struct AlsaMidiInput : IMidiInput
 };
 }
 
-Unique<IMidiInput> createMidiInput(int portNumber)
-{
-  return makeUnique<AlsaMidiInput>(portNumber);
-}
-
+Unique<IMidiInput> createMidiInput(int portNumber) { return makeUnique<AlsaMidiInput>(portNumber); }

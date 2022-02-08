@@ -5,7 +5,7 @@
 struct ProfileScope
 {
   ProfileScope()
-    : t1(get_monotonic_time())
+      : t1(get_monotonic_time())
   {
   }
 
@@ -18,10 +18,9 @@ struct ProfileScope
     if(duration > maxDuration)
     {
       maxDuration = duration;
-      fprintf(stderr, "Max duration: %.1f ms\n", maxDuration*1000.0);
+      fprintf(stderr, "Max duration: %.1f ms\n", maxDuration * 1000.0);
     }
   }
 
   const double t1;
 };
-

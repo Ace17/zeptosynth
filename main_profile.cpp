@@ -1,5 +1,6 @@
-#include <time.h>
 #include <stdio.h>
+#include <time.h>
+
 #include "synth.h"
 
 int main()
@@ -23,4 +24,3 @@ int main()
   printf("time=%.2f\n", (t2 - t1) / double(CLOCKS_PER_SEC));
   return 0;
 }
-

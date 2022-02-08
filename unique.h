@@ -10,7 +10,10 @@ template<typename T>
 struct Unique
 {
   Unique() = default;
-  Unique(T* ptr_) : ptr(ptr_) {}
+  Unique(T* ptr_)
+      : ptr(ptr_)
+  {
+  }
   ~Unique() { delete ptr; }
 
   template<typename V>
@@ -22,20 +25,16 @@ struct Unique
   }
 
   // disable copy
-  Unique(Unique const &) = delete;
-  Unique& operator = (Unique const&) = delete;
+  Unique(Unique const&) = delete;
+  Unique& operator=(Unique const&) = delete;
 
-  T* operator -> ()
-  {
-    return ptr;
-  }
+  T* operator->() { return ptr; }
 
-  T* ptr {};
+  T* ptr{};
 };
 
 template<typename T, typename... Args>
-Unique<T> makeUnique(Args && ... args)
+Unique<T> makeUnique(Args&&... args)
 {
   return Unique<T>(new T(args...));
 }
-
