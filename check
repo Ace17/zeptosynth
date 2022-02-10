@@ -1,32 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PKGS=()
-PKGS+=(sdl2)
-PKGS+=(alsa)
-
-SRCS=()
-SRCS+=(main.cpp)
-SRCS+=(synth.cpp)
-SRCS+=(midi_input.cpp)
-SRCS+=(audio_output_sdl.cpp)
-
 function timeexec
 {
   /usr/bin/time -f "%U" "$@"
 }
 
 (
-timeexec g++ -o profile -O3 main_profile.cpp synth.cpp
-timeexec g++ -o demo    -O3 main_demo.cpp    synth.cpp audio_output_sdl.cpp $(pkg-config ${PKGS[@]} --cflags --libs)
-)
-
-(
 echo "------------"
 echo "Native build"
-timeexec g++                     ${SRCS[@]} $(pkg-config ${PKGS[@]} --cflags --libs) -o zeptosynth-native
-stat -c '%s' zeptosynth-native
-echo ""
+export BIN="bin/native"
+make clean
+timeexec make -j`nproc`
 )
 
 (
@@ -38,10 +23,15 @@ OPT+=(-O3)
 # OPT+=(-mtune=cortex-a53)
 # OPT+=(-mfloat-abi=hard)
 # OPT+=(-mfpu=neon-fp-armv8)
+
+export BIN="bin/rpi"
 export PKG_CONFIG_LIBDIR=/usr/lib/arm-linux-gnueabihf/pkgconfig:/opt/envs/rpi/lib/pkgconfig
-timeexec arm-linux-gnueabihf-g++ ${OPT[@]} ${SRCS[@]} $(pkg-config ${PKGS[@]} --cflags --libs) -o zeptosynth
-arm-linux-gnueabihf-strip -s zeptosynth
-stat -c '%s' zeptosynth
-echo ""
+export CXX="arm-linux-gnueabihf-g++"
+export CXXFLAGS="$OPT"
+export LDFLAGS=-s
+make clean
+timeexec make -j`nproc` $BIN/zeptosynth.exe
+size=$(stat -c '%s' $BIN/zeptosynth.exe)
+echo "Synth size: $size bytes"
 )
 
