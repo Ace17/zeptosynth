@@ -15,7 +15,7 @@ struct SdlAudioOutput : IAudioOutput
     audio.freq = SAMPLERATE;
     audio.format = AUDIO_F32;
     audio.channels = 1;
-    audio.samples = 1024;
+    audio.samples = 128;
     audio.callback = mixAudio;
     audio.userdata = this;
 
