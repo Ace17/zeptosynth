@@ -59,7 +59,6 @@ struct Synth
   struct Voice
   {
     double pitch = 0;
-    double freq = 0;
     double vol = 0;
     double phase = 0;
   };
