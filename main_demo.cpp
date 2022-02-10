@@ -25,13 +25,16 @@ void safeMain()
 
   auto output = createAudioOutput(&synthesize, &synth);
 
-  for(int i=0;i < 4;++i)
+  for(int i=0;i < 8;++i)
   {
     const int note = 48 + i * 2;
     synth.pushCommand({Command::NoteOn, note, 1});
     SDL_Delay(100);
     synth.pushCommand({Command::NoteOff, note, 1});
     SDL_Delay(100);
+
+    if(i == 3)
+      synth.pushCommand({Command::ConfigChange, 1, 0.5});
   }
 
   SDL_Delay(1000);
