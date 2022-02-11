@@ -9,7 +9,7 @@ struct SdlAudioOutput : IAudioOutput
       : m_callback(callback)
       , m_userParam(userParam)
   {
-    SDL_Init(SDL_INIT_EVERYTHING);
+    SDL_InitSubSystem(SDL_INIT_AUDIO);
 
     SDL_AudioSpec audio{};
     audio.freq = SAMPLERATE;
@@ -21,19 +21,25 @@ struct SdlAudioOutput : IAudioOutput
 
     SDL_AudioSpec actual;
 
-    if(SDL_OpenAudio(&audio, &actual) < 0)
-      throw Exception{"Can't open audio"};
+    m_deviceId = SDL_OpenAudioDevice(nullptr, 0, &audio, &actual, 0);
+    if(!m_deviceId)
+    {
+      static char buffer[256];
+      sprintf(buffer, "Can't open audio device: %s", SDL_GetError());
+      throw Exception{buffer};
+    }
 
     printf("[audio] %d Hz %d channels, 0x%.4X (%d samples)\n", actual.freq, actual.channels, actual.format,
           actual.samples);
 
-    SDL_PauseAudio(0);
+    SDL_PauseAudioDevice(m_deviceId, 0);
   }
 
   ~SdlAudioOutput()
   {
-    SDL_CloseAudio();
-    SDL_Quit();
+    SDL_CloseAudioDevice(m_deviceId);
+    SDL_QuitSubSystem(SDL_INIT_AUDIO);
+    printf("[audio] shutdown\n");
   }
 
   static void mixAudio(void* userData, Uint8* stream, int len)
@@ -46,6 +52,7 @@ struct SdlAudioOutput : IAudioOutput
 
   AudioCallback* const m_callback;
   void* const m_userParam;
+  SDL_AudioDeviceID m_deviceId;
 };
 }
 
