@@ -14,10 +14,10 @@ LDFLAGS+=$(shell pkg-config $(PKGS) --libs)
 #------------------------------------------------------------------------------
 
 ZEPTOSYNTH_SRCS:=\
-  audio_output_sdl.cpp\
-  main.cpp\
-  midi_input.cpp\
-  synth.cpp\
+  src/audio_output_sdl.cpp\
+  src/main.cpp\
+  src/midi_input.cpp\
+  src/synth.cpp\
 
 TARGETS+=$(BIN)/zeptosynth.exe
 $(BIN)/zeptosynth.exe: $(ZEPTOSYNTH_SRCS:%=$(BIN)/%.o)
@@ -25,9 +25,9 @@ $(BIN)/zeptosynth.exe: $(ZEPTOSYNTH_SRCS:%=$(BIN)/%.o)
 #------------------------------------------------------------------------------
 
 DEMO_SRCS:=\
-  audio_output_sdl.cpp\
-  main_demo.cpp\
-  synth.cpp\
+  src/audio_output_sdl.cpp\
+  src/main_demo.cpp\
+  src/synth.cpp\
 
 TARGETS+=$(BIN)/demo.exe
 $(BIN)/demo.exe: $(DEMO_SRCS:%=$(BIN)/%.o)
@@ -35,8 +35,8 @@ $(BIN)/demo.exe: $(DEMO_SRCS:%=$(BIN)/%.o)
 #------------------------------------------------------------------------------
 
 PROFILE_SRCS:=\
-  main_profile.cpp\
-  synth.cpp\
+  src/main_profile.cpp\
+  src/synth.cpp\
 
 TARGETS+=$(BIN)/profile.exe
 $(BIN)/profile.exe: $(PROFILE_SRCS:%=$(BIN)/%.o)
