@@ -89,7 +89,10 @@ void Synth::processPendingCommands()
       noteOff(cmd.value1);
       break;
     case Command::ConfigChange:
-      config.values[cmd.value1] = cmd.value2;
+      {
+        auto& info = ConfigTypeInfo[cmd.value1];
+        *((double*)(((uint8_t*)&config) + info.offset)) = cmd.value2;
+      }
       break;
     }
   }

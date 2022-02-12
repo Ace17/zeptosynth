@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stddef.h>
+
 #include "fifo.h"
 
 const int MaxVoices = 16;
@@ -20,23 +22,22 @@ struct Command
 
 struct Config
 {
-  union
-  {
-    struct
-    {
-      double Volume = 1;
-      double LfoAmount = 0;
-      double PitchBendDelta = 0;
-    };
-    double values[3];
-  };
+  double Volume = 1;
+  double LfoAmount = 0;
+  double PitchBendDelta = 0;
 };
 
-const Config DefaultConfig;
+struct ConfigVarTypeInfo
+{
+  const char* name;
+  size_t offset;
+};
 
-static_assert(&DefaultConfig.values[0] == &DefaultConfig.Volume);
-static_assert(&DefaultConfig.values[1] == &DefaultConfig.LfoAmount);
-static_assert(&DefaultConfig.values[2] == &DefaultConfig.PitchBendDelta);
+constexpr ConfigVarTypeInfo ConfigTypeInfo[] = {
+      {"Volume", offsetof(Config, Volume)},
+      {"LfoAmount", offsetof(Config, LfoAmount)},
+      {"PitchBendDelta", offsetof(Config, PitchBendDelta)},
+};
 
 struct Synth
 {
