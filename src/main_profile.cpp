@@ -18,7 +18,7 @@ int main()
   while(sampleCount > 0)
   {
     float buff[blockSize];
-    synth.pushCommand({Command::NoteOn, note%128, 1});
+    synth.pushCommand({Command::NoteOn, note % 128, 1});
     synth.run(buff, blockSize);
     sampleCount -= blockSize;
     ++note;
@@ -26,7 +26,7 @@ int main()
 
   const auto t1 = get_monotonic_time();
 
-  fprintf(stderr, "Speed: %.3f kilosample/s\n", N/((t1-t0)*1000.0));
+  fprintf(stderr, "Speed: %.3f kilosample/s\n", N / ((t1 - t0) * 1000.0));
 
   return 0;
 }
