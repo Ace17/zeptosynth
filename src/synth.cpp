@@ -25,14 +25,6 @@ inline double pitchToFreq(double pitch)
   return exp(pitch * LN_2 / 12.0);
 }
 
-inline double osc(double phase)
-{
-  if(0)
-    return sin(phase * 2.0 * M_PI);
-
-  return phase - floor(phase);
-}
-
 void Synth::run(float* samples, int count)
 {
   processPendingCommands();
@@ -53,14 +45,10 @@ void Synth::run(float* samples, int count)
 
     for(int i = 0; i < count; ++i)
     {
-      samples[i] += osc(voice.phase) * voice.vol;
-      voice.phase += freq;
+      samples[i] += voice.osc.work(floor(config.OscType), freq) * voice.vol;
     }
 
     lfoPhase += 10.0 * count / SAMPLERATE;
-
-    if(voice.phase >= 1)
-      voice.phase -= 1;
 
     if(lfoPhase >= 1)
       lfoPhase -= 1;
@@ -70,7 +58,7 @@ void Synth::run(float* samples, int count)
   {
     float s = samples[i];
 
-    s = s * config.Volume;
+    s = s * (config.Volume * 0.1);
 
     // slight saturation
     s = atan(s) / (M_PI * 0.5);
@@ -95,11 +83,11 @@ void Synth::processPendingCommands()
       noteOff(cmd.value1);
       break;
     case Command::ConfigChange:
-      {
-        auto& info = ConfigTypeInfo[cmd.value1];
-        *((double*)(((uint8_t*)&config) + info.offset)) = cmd.value2;
-      }
-      break;
+    {
+      auto& info = ConfigTypeInfo[cmd.value1];
+      *((double*)(((uint8_t*)&config) + info.offset)) = cmd.value2;
+    }
+    break;
     }
   }
 }
@@ -120,6 +108,8 @@ void Synth::noteOn(int note)
   auto& voice = voices[i];
   voice.pitch = note;
   voice.vol = 1.0;
+
+  voice.osc.phase = 0; // retrigger
 }
 
 void Synth::noteOff(int note)

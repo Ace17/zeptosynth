@@ -3,6 +3,7 @@
 #include <stddef.h>
 
 #include "fifo.h"
+#include "osc.h"
 
 const int MaxVoices = 16;
 
@@ -25,6 +26,7 @@ struct Config
   double Volume = 1;
   double LfoAmount = 0;
   double PitchBendDelta = 0;
+  double OscType = 3;
 };
 
 struct ConfigVarTypeInfo
@@ -37,6 +39,7 @@ constexpr ConfigVarTypeInfo ConfigTypeInfo[] = {
       {"Volume", offsetof(Config, Volume)},
       {"LfoAmount", offsetof(Config, LfoAmount)},
       {"PitchBendDelta", offsetof(Config, PitchBendDelta)},
+      {"OscType", offsetof(Config, OscType)},
 };
 
 struct Synth
@@ -62,6 +65,8 @@ struct Synth
     double pitch = 0;
     double vol = 0;
     double phase = 0;
+
+    Osc osc;
   };
 
   Voice voices[MaxVoices]{};

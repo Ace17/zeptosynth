@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+find src -name "*.cpp" -or -name "*.h" | xargs -L1 clang-format-11 -i
+
 function timeexec
 {
   /usr/bin/time -f "%U" "$@"

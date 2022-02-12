@@ -18,6 +18,8 @@ ZEPTOSYNTH_SRCS:=\
   src/main.cpp\
   src/midi_input.cpp\
   src/synth.cpp\
+  src/osc.cpp\
+  src/minblep.cpp\
 
 TARGETS+=$(BIN)/zeptosynth.exe
 $(BIN)/zeptosynth.exe: $(ZEPTOSYNTH_SRCS:%=$(BIN)/%.o)
@@ -28,6 +30,8 @@ DEMO_SRCS:=\
   src/audio_output_sdl.cpp\
   src/main_demo.cpp\
   src/synth.cpp\
+  src/osc.cpp\
+  src/minblep.cpp\
 
 TARGETS+=$(BIN)/demo.exe
 $(BIN)/demo.exe: $(DEMO_SRCS:%=$(BIN)/%.o)
@@ -37,6 +41,8 @@ $(BIN)/demo.exe: $(DEMO_SRCS:%=$(BIN)/%.o)
 PROFILE_SRCS:=\
   src/main_profile.cpp\
   src/synth.cpp\
+  src/osc.cpp\
+  src/minblep.cpp\
 
 TARGETS+=$(BIN)/profile.exe
 $(BIN)/profile.exe: $(PROFILE_SRCS:%=$(BIN)/%.o)

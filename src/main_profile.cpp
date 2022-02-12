@@ -1,14 +1,16 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "minblep.h"
 #include "monotime.h"
 #include "synth.h"
 
 int main()
 {
+  fprintf(stderr, "MINBLEP size: %.2fkB\n", (MINBLEP.len * sizeof(float)) / 1024.0);
   Synth synth;
 
-  const int N = 1024 * 1024 * 256;
+  const int N = 4096 * 256;
   const int blockSize = 256;
 
   const auto t0 = get_monotonic_time();

@@ -15,10 +15,18 @@ struct Span
   int len = 0;
 
   Span() = default;
-  Span(T* tab, int N) : data(tab), len(N) {}
+  Span(T* tab, int N)
+      : data(tab)
+      , len(N)
+  {
+  }
 
   template<size_t N>
-  Span(T (& tab)[N]) : data(tab), len(N) {}
+  Span(T (&tab)[N])
+      : data(tab)
+      , len(N)
+  {
+  }
 
   // construction from vector/string
   template<typename U, typename = decltype(((U*)0)->data())>
@@ -28,11 +36,15 @@ struct Span
     len = s.size();
   }
 
-  operator Span<const T>() { return { data, len }; }
+  operator Span<const T>() { return {data, len}; }
 
   T* begin() const { return data; }
   T* end() const { return data + len; }
-  T& operator [] (int i) { return data[i]; }
-  void operator += (int i) { data += i; len -= i; }
+  T& operator[](int i) { return data[i]; }
+  const T& operator[](int i) const { return data[i]; }
+  void operator+=(int i)
+  {
+    data += i;
+    len -= i;
+  }
 };
-
