@@ -149,16 +149,21 @@ float Osc::work_minblep_square(double phaseIncrement)
 
     double exactCrossTime = phase / (phaseIncrement * 2);
 
+    double tempIndex = (exactCrossTime * 8.0);
+
     for(int i = 0; i < MINBLEP.len / 8; ++i)
     {
-      double tempIndex = (exactCrossTime * 8.0) + (i * 8.0);
-      double tempFraction = tempIndex - floor(tempIndex);
-      const auto a = MINBLEP[(int)floor(tempIndex)];
-      const auto b = MINBLEP[(int)ceil(tempIndex)];
+      const auto f = floor(tempIndex);
+      const auto frac = tempIndex - f;
 
-      const auto val = (1.0 - lerp(tempFraction, a, b));
+      const auto a = MINBLEP[(int)f + 0];
+      const auto b = MINBLEP[(int)f + 1];
+
+      const auto val = (1.0 - lerp(frac, a, b));
 
       circularBuffer[(index + i) % RING_BUFFER_SIZE] += -sign * 2 * val;
+
+      tempIndex += 8;
     }
   }
 
