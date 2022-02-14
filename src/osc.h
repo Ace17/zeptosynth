@@ -24,6 +24,6 @@ struct Osc
   // minBlep
   int index = 0;
   int sign = 1;
-  static constexpr int RING_BUFFER_SIZE = 4096;
+  static constexpr int RING_BUFFER_SIZE = 1024;
   float circularBuffer[RING_BUFFER_SIZE]{};
 };
