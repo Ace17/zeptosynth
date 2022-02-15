@@ -57,8 +57,10 @@ $(BIN)/%.exe:
 
 $(BIN)/%.cpp.o: %.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c -o "$@" $<
+	$(CXX) $(CXXFLAGS) -MMD -MT "$@" -MF "$@.deps" -c -o "$@" $<
 
 clean:
 	rm -rf $(BIN)
+
+-include $(shell test -d $(BIN) && find $(BIN) -name "*.deps")
 
