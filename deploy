@@ -5,6 +5,7 @@ readonly HOST=pi@10.1.1.5
 
 ./check
 
-ssh $HOST killall -9 zeptosynth || true
+ssh $HOST killall -9 zeptosynth gui || true
 scp bin/rpi/zeptosynth.exe $HOST:/tmp/zeptosynth
-ssh $HOST /tmp/zeptosynth
+scp bin/rpi/gui.exe        $HOST:/tmp/gui
+ssh $HOST "/tmp/zeptosynth & /tmp/gui"

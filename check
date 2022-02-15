@@ -32,7 +32,7 @@ export CXX="arm-linux-gnueabihf-g++"
 export CXXFLAGS="$OPT"
 export LDFLAGS=-s
 make clean
-timeexec make -j`nproc` $BIN/zeptosynth.exe
+timeexec make -j`nproc` $BIN/zeptosynth.exe $BIN/gui.exe
 size=$(stat -c '%s' $BIN/zeptosynth.exe)
 loc=$(find src -type f | xargs wc -l | tail -n 1)
 echo "------------"

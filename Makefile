@@ -7,6 +7,7 @@ CXXFLAGS+=-O3
 PKGS:=\
   sdl2\
   alsa\
+  glesv2\
 
 CXXFLAGS+=$(shell pkg-config $(PKGS) --cflags)
 LDFLAGS+=$(shell pkg-config $(PKGS) --libs)
@@ -23,6 +24,14 @@ ZEPTOSYNTH_SRCS:=\
 
 TARGETS+=$(BIN)/zeptosynth.exe
 $(BIN)/zeptosynth.exe: $(ZEPTOSYNTH_SRCS:%=$(BIN)/%.o)
+
+#------------------------------------------------------------------------------
+
+GUI_SRCS:=\
+  src/main_gui.cpp\
+
+TARGETS+=$(BIN)/gui.exe
+$(BIN)/gui.exe: $(GUI_SRCS:%=$(BIN)/%.o)
 
 #------------------------------------------------------------------------------
 
