@@ -92,17 +92,24 @@ struct Vertex
 
 void drawScreen(GLuint vbo)
 {
+  static uint32_t time = 0;
+
+  time++;
+
   SAFEGL(glClearColor(0, 0, 0, 1));
   SAFEGL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-  const Vertex vertices[] = {
-        {/* xy */ -0.5, -0.5, /* rgba */ 1, 1, 1, 1},
-        {/* xy */ -0.5, +0.5, /* rgba */ 1, 1, 1, 1},
-        {/* xy */ +0.5, +0.5, /* rgba */ 1, 1, 1, 1},
+  const float lfo1 = float(sin(time * 0.017) * 0.6);
+  const float lfo2 = float(sin(time * 0.031) * 0.6);
 
+  const Vertex vertices[] = {
         {/* xy */ +1, +1, /* rgba */ 1, 0, 0, 1},
         {/* xy */ +1, -1, /* rgba */ 0, 1, 0, 1},
         {/* xy */ -1, -1, /* rgba */ 0, 0, 1, 1},
+
+        {/* xy */ -0.5, -0.5f + lfo1, /* rgba */ 1, 1, 1, 1},
+        {/* xy */ -0.5, +0.5, /* rgba */ 1, 1, 1, 1},
+        {/* xy */ +0.5f + lfo2, +0.5, /* rgba */ 1, 1, 1, 1},
   };
 
   SAFEGL(glBindBuffer(GL_ARRAY_BUFFER, vbo));
