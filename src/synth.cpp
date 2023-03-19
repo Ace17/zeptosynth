@@ -43,10 +43,9 @@ void Synth::run(float* samples, int count)
 
     auto freq = pitchToFreq(pitch - 69) * 440.0 / SAMPLERATE;
 
+    const int oscType = floor(config.OscType);
     for(int i = 0; i < count; ++i)
-    {
-      samples[i] += voice.osc.work(floor(config.OscType), freq) * voice.vol;
-    }
+      samples[i] += voice.osc.work(oscType, freq) * voice.vol;
 
     lfoPhase += 10.0 * count / SAMPLERATE;
 
