@@ -69,7 +69,6 @@ struct Synth
   {
     double pitch = 0;
     double vol = 0;
-    double phase = 0;
 
     Osc osc;
   };
