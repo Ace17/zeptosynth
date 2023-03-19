@@ -33,6 +33,9 @@ void processMidiEvent(Synth* synth, const uint8_t* data, int len)
   if(status == 0xFE)
     return; // active sensing: ignore
 
+  // ignore channel
+  status &= 0xF0;
+
   if(status == 0x90 && data[1] > 0)
   {
     const int note = data[0];

@@ -21,19 +21,27 @@ void synthesize(float* samples, int count, void* userParam)
 
 void playSong(Synth& synth, std::function<void(int ms)> wait)
 {
-  if(0)
+  // pwm
   {
-    synth.pushCommand({Command::ConfigChange, 3, (double)5});
-    synth.pushCommand({Command::NoteOn, 40, 1});
-    wait(1000);
-    synth.pushCommand({Command::NoteOff, 40, 1});
-    wait(10);
-    synth.pushCommand({Command::ConfigChange, 3, (double)1});
-    synth.pushCommand({Command::NoteOn, 40, 1});
-    wait(1000);
-    synth.pushCommand({Command::NoteOff, 40, 1});
-    wait(10);
-    return;
+    synth.pushCommand({Command::ConfigChange, 3, 5}); // osctype=minblep_pulse
+    synth.pushCommand({Command::ConfigChange, 1, 0}); // mod=0
+
+    for(double pwm = 0.10; pwm < 0.9; pwm += 0.1)
+    {
+      synth.pushCommand({Command::ConfigChange, 4, pwm});
+      synth.pushCommand({Command::NoteOn, 60, 1});
+      synth.pushCommand({Command::NoteOn, 67, 1});
+      wait(100);
+      synth.pushCommand({Command::NoteOff, 60, 1});
+      synth.pushCommand({Command::NoteOff, 67, 1});
+      wait(50);
+      synth.pushCommand({Command::NoteOn, 60, 1});
+      synth.pushCommand({Command::NoteOn, 67, 1});
+      wait(200);
+      synth.pushCommand({Command::NoteOff, 60, 1});
+      synth.pushCommand({Command::NoteOff, 67, 1});
+      wait(100);
+    }
   }
 
   for(int oscType : {1, 3, 5})

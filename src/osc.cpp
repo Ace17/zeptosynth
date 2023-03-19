@@ -21,7 +21,7 @@ float Osc::work(int type, double phaseIncrement)
   case 4:
     return work_feedbackfm_sawtooth(phaseIncrement);
   case 5:
-    return work_minblep_square(phaseIncrement);
+    return work_minblep_pulse(phaseIncrement);
   case 6:
     return work_minblep_sawtooth(phaseIncrement);
   default:
@@ -138,32 +138,36 @@ float Osc::work_minblep_sawtooth(double phaseIncrement)
   return output;
 }
 
-float Osc::work_minblep_square(double phaseIncrement)
+float Osc::work_minblep_pulse(double phaseIncrement)
 {
   phase += phaseIncrement;
   index = (index + 1) % RING_BUFFER_SIZE;
-  if(phase >= 0.5)
+
+  const auto phaseThreshold = sign > 0 ? pwm : 1 - pwm;
   {
-    phase -= 0.5;
-    sign = -sign;
-
-    double exactCrossTime = phase / phaseIncrement;
-
-    double tempIndex = (exactCrossTime * 8.0);
-
-    for(int i = 0; i < MINBLEP.len / 8; ++i)
+    if(phase >= phaseThreshold)
     {
-      const auto f = floor(tempIndex);
-      const auto frac = tempIndex - f;
+      phase -= phaseThreshold;
+      sign = -sign;
 
-      const auto a = MINBLEP[(int)f + 0];
-      const auto b = MINBLEP[(int)f + 1];
+      double exactCrossTime = phase / phaseIncrement;
 
-      const auto val = (1.0 - lerp(frac, a, b));
+      double tempIndex = (exactCrossTime * 8.0);
 
-      circularBuffer[(index + i) % RING_BUFFER_SIZE] += -sign * 2 * val;
+      for(int i = 0; i < MINBLEP.len / 8; ++i)
+      {
+        const auto f = floor(tempIndex);
+        const auto frac = tempIndex - f;
 
-      tempIndex += 8;
+        const auto a = MINBLEP[(int)f + 0];
+        const auto b = MINBLEP[(int)f + 1];
+
+        const auto val = (1.0 - lerp(frac, a, b));
+
+        circularBuffer[(index + i) % RING_BUFFER_SIZE] += -sign * 2 * val;
+
+        tempIndex += 8;
+      }
     }
   }
 

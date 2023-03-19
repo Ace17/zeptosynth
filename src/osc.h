@@ -5,6 +5,7 @@
 struct Osc
 {
   double phase = 0.0;
+  double pwm = 0.10;
 
   float work(int type, double phaseIncrement);
 
@@ -15,7 +16,7 @@ struct Osc
   float work_feedbackfm_sawtooth(double phaseIncrement);
   float work_feedbackfm_square(double phaseIncrement);
   float work_minblep_sawtooth(double phaseIncrement);
-  float work_minblep_square(double phaseIncrement);
+  float work_minblep_pulse(double phaseIncrement);
 
   // feedback FM
   double internalHistory1 = 0.0;

@@ -44,6 +44,8 @@ void Synth::run(float* samples, int count)
     auto freq = pitchToFreq(pitch - 69) * 440.0 / SAMPLERATE;
 
     const int oscType = floor(config.OscType);
+    voice.osc.pwm = config.PWM;
+
     for(int i = 0; i < count; ++i)
       samples[i] += voice.osc.work(oscType, freq) * voice.vol;
 
