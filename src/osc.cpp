@@ -140,14 +140,14 @@ float Osc::work_minblep_sawtooth(double phaseIncrement)
 
 float Osc::work_minblep_square(double phaseIncrement)
 {
-  phase += phaseIncrement * 2;
+  phase += phaseIncrement;
   index = (index + 1) % RING_BUFFER_SIZE;
-  if(phase >= 1.0)
+  if(phase >= 0.5)
   {
-    phase -= 1.0;
+    phase -= 0.5;
     sign = -sign;
 
-    double exactCrossTime = phase / (phaseIncrement * 2);
+    double exactCrossTime = phase / phaseIncrement;
 
     double tempIndex = (exactCrossTime * 8.0);
 
