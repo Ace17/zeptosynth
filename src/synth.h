@@ -25,6 +25,7 @@ struct Config
 {
   double Volume = 1;
   double LfoAmount = 0;
+  double LfoRate = 0.5;
   double PitchBendDelta = 0;
   double OscType = 5;
   double PWM = 0.75;
@@ -43,6 +44,7 @@ constexpr ConfigVarTypeInfo ConfigTypeInfo[] = {
       {3, "OscType", offsetof(Config, OscType)},
       {4, "PWM", offsetof(Config, PWM)},
       {7, "Volume", offsetof(Config, Volume)},
+      {5, "LfoRate", offsetof(Config, LfoRate)},
 };
 
 struct Synth

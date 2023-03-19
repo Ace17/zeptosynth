@@ -49,7 +49,7 @@ void Synth::run(float* samples, int count)
     for(int i = 0; i < count; ++i)
       samples[i] += voice.osc.work(oscType, freq) * voice.vol;
 
-    lfoPhase += 10.0 * count / SAMPLERATE;
+    lfoPhase += 20.0 * config.LfoRate * count / SAMPLERATE;
 
     if(lfoPhase >= 1)
       lfoPhase -= 1;
