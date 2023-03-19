@@ -61,6 +61,10 @@ struct Synth
   void noteOn(int note);
   void noteOff(int note);
 
+  // runs the synth with fixed parameters
+  void runChunk(float* samples, int count);
+  void updateParamsForNextChunk();
+
   // synth config
   Config config{};
 
@@ -71,11 +75,16 @@ struct Synth
     double vol = 0;
 
     Osc osc;
+
+    // auxiliary quantities
+    double aux_freq = 0;
   };
 
   Voice voices[MaxVoices]{};
   char noteToVoice[128]{};
   double lfoPhase = 0;
+
+  int remainingInChunk = 0;
 
   // command queue: filled b the input thread, consumed by the audio thread
   Fifo<Command> commandQueue;

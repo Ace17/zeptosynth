@@ -25,6 +25,8 @@ inline double pitchToFreq(double pitch)
   return exp(pitch * LN_2 / 12.0);
 }
 
+const int CHUNK_PERIOD = 16;
+
 void Synth::run(float* samples, int count)
 {
   processPendingCommands();
@@ -32,27 +34,56 @@ void Synth::run(float* samples, int count)
   for(int i = 0; i < count; ++i)
     samples[i] = 0;
 
+  while(count > 0)
+  {
+    if(remainingInChunk <= 0)
+    {
+      // start a new chunk
+      remainingInChunk += CHUNK_PERIOD;
+      updateParamsForNextChunk();
+    }
+
+    // process chunk
+    int subCount = std::min(remainingInChunk, count);
+    runChunk(samples, subCount);
+
+    samples += subCount;
+    count -= subCount;
+    remainingInChunk -= subCount;
+  }
+}
+
+void Synth::updateParamsForNextChunk()
+{
   for(auto& voice : voices)
   {
     if(voice.vol == 0)
       continue;
 
-    auto pitch = voice.pitch + config.PitchBendDelta;
-
+    double pitch = voice.pitch + config.PitchBendDelta;
     pitch += sin(lfoPhase * 2.0 * M_PI) * config.LfoAmount;
 
-    auto freq = pitchToFreq(pitch - 69) * 440.0 / SAMPLERATE;
+    voice.aux_freq = pitchToFreq(pitch - 69) * 440.0 / SAMPLERATE;
+    voice.osc.pwm = clamp(config.PWM, 0.0, 1.0);
+  }
+
+  lfoPhase += 20.0 * config.LfoRate * CHUNK_PERIOD / SAMPLERATE;
+
+  if(lfoPhase >= 1)
+    lfoPhase -= 1;
+}
+
+void Synth::runChunk(float* samples, int count)
+{
+  for(auto& voice : voices)
+  {
+    if(voice.vol == 0)
+      continue;
 
     const int oscType = floor(config.OscType);
-    voice.osc.pwm = clamp(config.PWM, 0.0, 1.0);
 
     for(int i = 0; i < count; ++i)
-      samples[i] += voice.osc.work(oscType, freq) * voice.vol;
-
-    lfoPhase += 20.0 * config.LfoRate * count / SAMPLERATE;
-
-    if(lfoPhase >= 1)
-      lfoPhase -= 1;
+      samples[i] += voice.osc.work(oscType, voice.aux_freq) * voice.vol;
   }
 
   for(int i = 0; i < count; ++i)
