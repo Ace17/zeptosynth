@@ -23,12 +23,12 @@ void playSong(Synth& synth, std::function<void(int ms)> wait)
 {
   // pwm
   {
-    synth.pushCommand({Command::ConfigChange, 3, 5}); // osctype=minblep_pulse
-    synth.pushCommand({Command::ConfigChange, 1, 0}); // mod=0
+    synth.pushCommand({Command::ConfigChange, 2, 5}); // osctype=minblep_pulse
+    synth.pushCommand({Command::ConfigChange, 0, 0}); // mod=0
 
     for(double pwm = 0.10; pwm < 0.9; pwm += 0.1)
     {
-      synth.pushCommand({Command::ConfigChange, 4, pwm});
+      synth.pushCommand({Command::ConfigChange, 3, pwm});
       synth.pushCommand({Command::NoteOn, 60, 1});
       synth.pushCommand({Command::NoteOn, 67, 1});
       wait(100);
@@ -46,7 +46,7 @@ void playSong(Synth& synth, std::function<void(int ms)> wait)
 
   for(int oscType : {1, 3, 5})
   {
-    synth.pushCommand({Command::ConfigChange, 3, (double)oscType});
+    synth.pushCommand({Command::ConfigChange, 2, (double)oscType});
     for(int i = 0; i < 8; ++i)
     {
       const int note = 90 + i * 2;
@@ -56,7 +56,7 @@ void playSong(Synth& synth, std::function<void(int ms)> wait)
       wait(100);
 
       if(i == 5)
-        synth.pushCommand({Command::ConfigChange, 1, 0.5});
+        synth.pushCommand({Command::ConfigChange, 0, 0.5});
     }
   }
 

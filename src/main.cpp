@@ -51,12 +51,15 @@ void processMidiEvent(Synth* synth, const uint8_t* data, int len)
   }
   else if(status == 0xB0)
   {
-    if(data[0] == 1) // mod wheel
+    int index = -1;
+    for(auto& configVarInfo : ConfigTypeInfo)
+      if(configVarInfo.midiCC == data[0])
+        index = int(&configVarInfo - ConfigTypeInfo);
+
+    if(index >= 0)
     {
       const double value = data[1] / 128.0;
-
-      // LFO amount
-      synth->pushCommand({Command::ConfigChange, 1, value});
+      synth->pushCommand({Command::ConfigChange, index, value});
     }
     else
     {
@@ -69,7 +72,7 @@ void processMidiEvent(Synth* synth, const uint8_t* data, int len)
     const double value = 2.0 * pos; // [-2, 2]
 
     // pitchbend delta
-    synth->pushCommand({Command::ConfigChange, 2, value});
+    synth->pushCommand({Command::ConfigChange, 1, value});
   }
   else if(1)
   {

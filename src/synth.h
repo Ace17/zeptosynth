@@ -32,16 +32,17 @@ struct Config
 
 struct ConfigVarTypeInfo
 {
+  int midiCC;
   const char* name;
   size_t offset;
 };
 
 constexpr ConfigVarTypeInfo ConfigTypeInfo[] = {
-      {"Volume", offsetof(Config, Volume)},
-      {"LfoAmount", offsetof(Config, LfoAmount)},
-      {"PitchBendDelta", offsetof(Config, PitchBendDelta)},
-      {"OscType", offsetof(Config, OscType)},
-      {"PWM", offsetof(Config, PWM)},
+      {1, "LfoAmount", offsetof(Config, LfoAmount)},
+      {2, "PitchBendDelta", offsetof(Config, PitchBendDelta)},
+      {3, "OscType", offsetof(Config, OscType)},
+      {4, "PWM", offsetof(Config, PWM)},
+      {7, "Volume", offsetof(Config, Volume)},
 };
 
 struct Synth
